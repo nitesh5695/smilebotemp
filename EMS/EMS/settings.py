@@ -27,7 +27,7 @@ JWT_REFRESH_KEY="thisis@secretkeythisis@secretkeythisis@secretkey"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['smilebotemp.herokuapp.com','127.0.0.1']
+ALLOWED_HOSTS = ['smilebotems.herokuapp.com','127.0.0.1']
 
 
 

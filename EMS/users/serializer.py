@@ -29,4 +29,6 @@ class company_profileSerializer(serializers.ModelSerializer):
 class employer_profileSerializer(serializers.ModelSerializer):
     class Meta:
         model=employer_profile
-        fields="__all__"            
+        fields="__all__"         
+
+

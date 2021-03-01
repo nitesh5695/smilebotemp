@@ -11,6 +11,12 @@ class MyAuthentication():
             return True
         except employers.DoesNotExist:
             return False    
+    def iscompany(email):
+        try:
+            user=companies.objects.get(email=email) 
+            return True
+        except companies.DoesNotExist:
+            return False            
 
     def authenticate(request,email=None, password=None):    
         try:

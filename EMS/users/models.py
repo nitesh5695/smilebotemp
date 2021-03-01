@@ -12,13 +12,15 @@ class companies(models.Model):
         return str(self.company_id)
 
 class company_profile(models.Model):
+    def nameFile(instance, filename):
+      return '/'.join(['images', str(instance.company_id), filename])
     company_id=models.OneToOneField(companies,on_delete=models.CASCADE ,primary_key=True) 
     address=models.CharField(max_length=600)
     established_year=models.CharField(max_length=4)
     ceo=models.CharField(max_length=100)
     contact_no=models.CharField(max_length=13)
     gst_no=models.CharField(max_length=100)
-    company_logo=models.CharField(max_length=300,blank=True)
+    company_logo=models.ImageField(upload_to=nameFile,blank=True)
     modified_at=models.DateField(default=datetime.date.today)
     created_at=models.DateField(auto_now_add=True,blank=True)
 
@@ -35,6 +37,8 @@ class employers(models.Model):
         return self.email
 
 class employer_profile(models.Model):
+    def nameFile(instance, filename):
+      return '/'.join(['images', str(instance.company_id), filename])
     emp_id=models.OneToOneField(employers,on_delete=models.CASCADE,primary_key=True)
     dob=models.DateField()
     choice=(
@@ -46,7 +50,7 @@ class employer_profile(models.Model):
     address=models.CharField(max_length=600,blank=True)
     mobile_no=models.CharField(max_length=13,blank=True)
     joining_date=models.DateField()
-    profile_image=models.CharField(max_length=300,blank=True)
+    profile_image=models.ImageField(upload_to=nameFile,blank=True)
     company_id=models.ForeignKey(companies,on_delete=models.CASCADE)
     project_id=models.ForeignKey(to='management.Project',on_delete=models.CASCADE,null=True)
     department_id=models.ForeignKey(to='management.Department',on_delete=models.CASCADE)

@@ -4,9 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .JWTTokens import *
 from .JWTTokenAuthentication import JWTAuthentication
-from .permissions import companyPermission,employerPermission
+from .permissions import OnlyCompanyPermission, companyPermission,employerPermission
 from .backend  import MyAuthentication
 from .models import employers,employer_profile,companies,company_profile
+from management.models import Project,Leave,Salary
 from  .serializer import companySerializer,employerSerializer,company_profileSerializer, employer_profileSerializer,employer_profileSerializer
 
 class newuser(APIView):
@@ -29,8 +30,11 @@ class gettoken(APIView):
             refresh=refresh_token(user)
             MyAuthentication.login(request,user.email)
             if MyAuthentication.isemployee(user.email):
+              try:
                 role="employee"
                 id=user.emp_id
+              except:
+                return Response({'message':'user is registered as company and employers , please remove your acccount from anyone'})    
             else:
                 role="company"
                 id=user.company_id
@@ -205,3 +209,77 @@ class employer_id(APIView):
         data=employers.objects.get(email=email,company_id=company_id)
         serializer=employerSerializer(data)
         return Response(serializer.data)
+
+class forget_password(APIView):
+    
+    def post(self,request):
+        email=request.data.get('email')
+        if MyAuthentication.iscompany(email):
+            data=companies.objects.get(email=email)
+            request.session['company_id']=data.company_id
+           
+            #send otp
+            request.session['email_otp']="1234"
+            print("dend otp")
+            print(request.session['email_otp'])
+            return Response({'message':'otp has been sent to your email','next_step':'enter your otp on /otp to set new password'})
+        return Response({'message':'invalid email'})
+
+class otp(APIView):
+    
+    def post(self,request):
+        print(request.session['email_otp'])
+        otp=request.data.get('otp')
+        if otp==request.session['email_otp']:
+            request.session['verification_otp']=otp
+            return Response({'message':'verification successfull','next_step':'send new_password on same endpoint with patch request'})
+        return Response({'message':'incorrect otp'})
+    def patch(self,request):
+     
+            company_id=request.session['company_id']
+            if request.session['email_otp']==request.session['verification_otp'] :
+                if request.data.get('new_password')==request.data.get('confirm_password'):
+                    company=companies.objects.get(company_id=company_id)
+                    data={
+                        "password":request.data.get('new_password')
+                        }
+                    serializer=companySerializer( company,data=data,partial=True)  
+                    if serializer.is_valid():
+                        serializer.save()
+                        return Response({'message':'successfully set password'})
+                    return Response(serializer.errors)
+                return Response({'message':'please verify your email first on /forget_password'})  
+
+             
+
+class dashboard(APIView):
+    authentication_classes=[JWTAuthentication]
+    def get(self,requet):
+        total_employer=employers.objects.filter(company_id=requet.session['company_id']).count()
+        total_projects=Project.objects.filter(company_id=requet.session['company_id']).count()
+        completed_projects=Project.objects.filter(company_id=requet.session['company_id'],status="Completed").count()
+        running_projects=Project.objects.filter(company_id=requet.session['company_id'],status="On Hold").count()
+        leave_requests=Leave.objects.filter(company_id=requet.session['company_id'],status="Pending").count()
+        total_salary=Salary.objects.filter(company_id=requet.session['company_id']).values('salary')
+        salary_sum=0
+        for x in total_salary:
+           salary_sum =salary_sum+x['salary']
+        print(salary_sum)
+        data={
+            "total_employer":total_employer,
+            "total_projects":total_projects,
+            "completed_projects":completed_projects,
+            "running_projects":running_projects,
+            "leave_requests":leave_requests,
+             "total_salary":salary_sum
+              }
+        
+    
+        return Response(data)
+
+
+
+
+
+
+

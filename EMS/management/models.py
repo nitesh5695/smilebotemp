@@ -69,7 +69,7 @@ class Project(models.Model):
     modified_at=models.DateField(default=datetime.date.today)
     created_at=models.DateField(auto_now_add=True)
 
-    status= models.CharField(max_length=20, choices=status_choice, default='Pending')
+    status= models.CharField(max_length=20, choices=status_choice, default='On Hold')
 
 class Salary(models.Model):
     salary_id = models.AutoField(primary_key=True)

@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.urls import path
 from users import views
 from management import views as mviews
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,7 +32,8 @@ urlpatterns = [
     path('attendance/',mviews.attendance.as_view()),
     path('attendance/<int:pk>/',mviews.attendance.as_view()),
     path('my_attendance/',mviews.my_attendance.as_view()),
-    path('check/',mviews.check.as_view()),
-    path('salary1/',mviews.salary1.as_view()),
-    path('salary1/<int:pk>/',mviews.salary1.as_view()),
-]
+     path('dashboard/',views.dashboard.as_view()),
+    path('forget_password/',views.forget_password.as_view()),
+    path('otp/',views.otp.as_view()),
+    
+]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
